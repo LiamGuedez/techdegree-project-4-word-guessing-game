@@ -103,6 +103,10 @@ button {
   border-radius: 5px;
 }
 
+.hide{
+  color: transparent;
+}
+
 .space {
   width: 15px;
 }
