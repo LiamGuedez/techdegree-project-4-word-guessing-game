@@ -8,9 +8,12 @@ class Phrase
   /**
    * Displays the constructor's phrase to the screen as a set of guessable characters.
    * Does this by converting this.phrase into a ul element, and appending it to the page.
+   * @param   {string}    action - If set to 'reset', it will remove the phrase from the board.
    */
-  addPhraseToDisplay()
+  addPhraseToDisplay(action='')
   {
+    if (action === 'reset')
+      document.querySelector('#the_phrase').remove();
     const makeLis = () =>
     {
       return this.phrase
@@ -24,6 +27,7 @@ class Phrase
         .reduce((lisString, li) => lisString += li + '\n','');
       }
     const ul = document.createElement('ul');
+    ul.id = 'the_phrase'
     ul.innerHTML = makeLis();
     document.querySelector('#phrase').appendChild(ul);
  }
@@ -31,7 +35,7 @@ class Phrase
   /**
    * Checks if letter selected by player matches a letter in the hidden phrase.
    * If so, calls this.showMatchedLetter().
-   * @param  {letter}  letter - Character to  be analyzed.
+   * @param   {string}    letter - Character to  be analyzed.
    * @return  {boolean}   Boolean value indicating whether the user selection matches (true) or not (false)
    */
   checkLetter(letter, toggleColor)

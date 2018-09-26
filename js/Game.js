@@ -49,30 +49,23 @@ class Game
 
   /**
    * Checks to see if the button clicked by the player matches a letter in the phrase.
+   * @param   {boolean}    condition - To be used by the if stament.
+   * @param   {string}  attribute - Attribute that will be styled and passed over to checkLetter().
    */
-  handleInteraction()
+  handleInteraction(condition, attribute)
   {
-    const isAlpha = str => /^[a-zA-Z]+$/.test(str);
     const toggleColor = item => {
       item.transition = 'background-color 100ms ease-in';
       item.backgroundColor = 'lightblue';
       setTimeout(() => {item.backgroundColor = '#e5e5e5'}, 100);
     }
-    const colorAndVerify = (condition, attribute) =>
+
+    if (condition)
     {
-      if (condition)
-      {
-        toggleColor(document.querySelector(`#${attribute}`).style);
-        this.phrase.checkLetter(attribute, toggleColor) ?
-          this.checkForWin() : this.removeLife();
-      }
+      toggleColor(document.querySelector(`#${attribute}`).style);
+      this.phrase.checkLetter(attribute, toggleColor) ?
+        this.checkForWin() : this.removeLife();
     }
-
-    document.querySelector('#qwerty').addEventListener('click', (event) =>
-       colorAndVerify(event.target.className === 'key', event.target.textContent));
-
-    document.addEventListener('keypress', (event) =>
-       colorAndVerify(isAlpha(event.key) === true, event.key));
   }
 
   /**
@@ -82,10 +75,9 @@ class Game
     {
       const tries = document.querySelectorAll('.tries img[src="images/liveHeart.png"]');
       const lostLife = tries[tries.length-1];
-      // lostLife.src = 'images/lostHeart.png';
       if(tries.length > 1){
         lostLife.src = 'images/lostHeart.png';
-      } else{
+      } else if(tries.length === 1){
         lostLife.src = 'images/lostHeart.png';
         this.gameOver('lose');
       }
@@ -104,24 +96,61 @@ class Game
   /**
    * Displays a message if the player wins or a different message if they lose.
    */
-  gameOver(gameOver)
+  gameOver(gameResult)
   {
-    gameOver === 'win' ?
-      setTimeout(() => {alert('YOU WIN!!!');}, 100)              :
-      setTimeout(() => {alert('BETTER LUCK NEXT TIME!!!');}, 100);
+    const disableTheKeyboard = (state, color) =>
+    {
+      const keys = document.querySelectorAll('.key');
+      keys.forEach(key =>
+      {
+        key.disabled = state;
+        key.style.color = color;
+      });
+    }
+
+    const resetTheTries = () =>
+    {
+      const tries = document.querySelectorAll('.tries img[src="images/lostHeart.png"]');
+      tries.forEach(image => image.src = "images/liveHeart.png");
+    }
+
+    const addResetFunctionality = button =>
+    {
+      button.addEventListener('click', () =>
+      {
+        disableTheKeyboard(false, '#37474f');
+        resetTheTries();
+        this.startGame('reset');
+        document.querySelector('#overlay').style.display = 'none';
+      });
+    }
+
+    const styleTheScreen = (className, title, gameOverMessage) =>
+    {
+      disableTheKeyboard(true, '#e5e5e5');
+      document.querySelector('#overlay').style.display = 'flex';
+      document.querySelector('#overlay').className = className;
+      document.querySelector('.title').innerHTML = title;
+      document.querySelector('#game-over-message').innerHTML = gameOverMessage;
+      document.querySelector('#btn__reset').className = 'btn__reset';
+      document.querySelector('#btn__reset').innerHTML = 'Reset Game';
+      addResetFunctionality(document.querySelector('.btn__reset'));
+    }
+  gameResult === 'win'?
+      styleTheScreen('win', `'${this.phrase.phrase}' is correct!`, 'YOU WIN!!!')               :
+      styleTheScreen('lose', '', 'BETTER LUCK NEXT TIME!!!');
   }
 
   /**
    * Calls the getRandomPhrase() method, and adds that phrase to the board
    * by calling the Phrase class' addPhraseToDisplay() method.
+   * @param   {string}    action - Variable to be sent to this.phrase.addPhraseToDisplay() to help with resetting the game.
    */
-  startGame()
+  startGame(action='')
   {
     const randomPhrase = this.getRandomPhrase();
     this.phrase = new Phrase(randomPhrase);
-    this.phrase.addPhraseToDisplay();
+    this.phrase.addPhraseToDisplay(action);
     this.handleInteraction();
-    console.log(this.phrase);
   }
-
 }
